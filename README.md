@@ -4,13 +4,19 @@ This is one half of Sparrow Rubin's second General Assembly Web Development Imme
 
 ## Design Notes
 
-These are being stored on in the API readme.
+These are being stored in the API readme.
 
 ## Resources and Credits
 
-This component was derived from [this template](https://git.generalassemb.ly/ga-wdi-boston/rails-api-template/).
+This front end template was derived from [this template](https://git.generalassemb.ly/ga-wdi-boston/rails-api-template/).
 
-There will be a back end part of the project soon.
+The front end Github link is [here](https://github.com/sparrowr/string-light-list).
+
+The front end deployed link is [here](https://sparrowr.github.io/string-light-list/). 
+
+The back end Github link is [here](https://github.com/sparrowr/api-string-light-list).
+
+The back end deployed link is [here](https://cryptic-refuge-45274.herokuapp.com/).
 
 
 ## [License](LICENSE)

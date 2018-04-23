@@ -1,2 +1,26 @@
 $icon-font-path: '~bootstrap-sass/assets/fonts/bootstrap/';
+
 @import '~bootstrap-sass/assets/stylesheets/bootstrap';
+
+$white: #fff;
+$black: #000;
+$lilac: #d9d2e9;
+$mint: #d0e0e3;
+$dark-berry: #741b47;
+$dark-cyan: #134f5c;
+
+body {
+  background-color: $mint;
+  color: $black;
+}
+
+h1,
+h2 {
+  color: $dark-cyan;
+  text-align: center;
+}
+
+.warning {
+  background-color: $dark-berry;
+  color: $white;
+}
