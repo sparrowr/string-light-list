@@ -55,7 +55,7 @@ const showSignUp = function showSignUp () {
   signUpForm.appendChild(passwordField)
   const passwordConfirmField = document.createElement('input')
   passwordConfirmField.setAttribute('type', 'password')
-  passwordConfirmField.setAttribute('name', 'credentials[confirm_password]')
+  passwordConfirmField.setAttribute('name', 'credentials[password_confirmation]')
   passwordConfirmField.setAttribute('placeholder', 'confirm password')
   signUpForm.appendChild(passwordConfirmField)
   const submitButton = document.createElement('input')
