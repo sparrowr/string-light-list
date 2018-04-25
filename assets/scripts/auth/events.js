@@ -125,7 +125,7 @@ const hideAuth = function hideAuth () {
 const showAuth = function showAuth () {
   // show some authy things!
   hideAuth()
-  $('#auth-area').html('<p class="warning">This is a student front-end project sending data to an educational API. There is no privacy policy! Please don\'t use credentials you have used anywhere important.<p>')
+  $('#auth-area').html('<p class="warning">This is a student project. Please don\'t use credentials you have used anywhere important.<p>')
   if (store.user) {
     // show change password and sign out
     const changePasswordShow = document.createElement('form')
