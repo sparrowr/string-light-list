@@ -1,17 +1,25 @@
 'use strict'
 
 const getFormFields = require('../../../lib/get-form-fields')
-// const api = require('./api')
-// const ui = require('./ui')
+const api = require('./api')
+const ui = require('./ui')
 const store = require('../store')
 
 const onAddNewTask = function onAddNewTask (event) {
   event.preventDefault()
   const data = getFormFields(event.target)
-  console.log(data)
-  // api.addTask(data)
-  //   .then(ui.addTaskSuccess)
-  //   .catch(ui.addTaskFailure)
+  // every newly-created task has the 'open' condition
+  data.task.condition = 'open'
+  if (store.user) {
+    data.task.user_id = store.user.id
+    console.log(data)
+    api.addTask(data)
+      .then(ui.addTaskSuccess)
+      .catch(ui.addTaskFailure)
+  } else {
+    store.tasks.push(data.task)
+    showTasks()
+  }
 }
 
 const displayAddNewTask = function displayAddNewTask (task) {
@@ -36,13 +44,36 @@ const displayOneTask = function displayOneTask (task) {
   // create task UI element
   // attach buttons with event listeners to complete and edit
   // append this element as a child of the task-area div
+  console.log(task)
+  const taskElement = document.createElement('form')
+  const editTaskButton = document.createElement('input')
+  const taskInfo = document.createElement('p')
+  taskInfo.setAttribute('value', task.text)
+  taskElement.appendChild(taskInfo)
+  editTaskButton.setAttribute('type', 'submit')
+  taskElement.appendChild(editTaskButton)
+  document.getElementById('task-area').appendChild(taskElement)
 }
 
 const displayAllTasks = function displayAllTasks () {
-  // get all tasks
-  // display each task
-  const task = {}
-  displayOneTask(task)
+  // if user, fetch user's tasks
+  if (store.user) {
+    // api call here
+    api.getAllTasks()
+      .then(ui.getAllTasksSuccess)
+      .catch(ui.getAllTasksFailure)
+  }
+  // if no tasks, do nothing
+  // if there's no user and no tasks, do nothing
+  if (!store.tasks) {
+    return
+  }
+  // iterate over tasks, displaying only the ones belonging to this user
+  for (let i = 0; i < store.tasks.length; i++) {
+    if (store.tasks[i].user.id === store.user.id && store.tasks[i].condition !== 'closed') {
+      displayOneTask(store.tasks[i])
+    }
+  }
 }
 
 const hideTasks = function hideTasks () {
@@ -63,6 +94,7 @@ const displayHideTasksButton = function displayHideTasksButton () {
 
 const showTasks = function showTasks () {
   // show task stuff!
+  console.log('showTasks in events.js was called!')
   hideTasks()
   if (store.user) {
     // if signed in, welcome user
