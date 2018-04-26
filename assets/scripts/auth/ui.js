@@ -1,6 +1,7 @@
 'use strict'
 
 const store = require('../store')
+const tasks = require('../tasks/events')
 const failureColor = '#d9d2e9'
 const successColor = '#d0e0e3'
 
@@ -8,7 +9,7 @@ const signUpSuccess = function () {
   $('#message').text('Successfully signed up')
   $('#message').css('background-color', successColor)
   $('#auth-area').html('')
-  $('#game-area').html('')
+  tasks.hideTasks()
 }
 
 const signUpFailure = function () {
@@ -21,7 +22,7 @@ const signInSuccess = function (data) {
   $('#message').css('background-color', successColor)
   store.user = data.user
   $('#auth-area').html('')
-  $('#game-area').html('')
+  tasks.hideTasks()
 }
 
 const signInFailure = function () {
@@ -44,9 +45,9 @@ const signOutSuccess = function () {
   $('#message').text('Successfully signed out!')
   $('#message').css('background-color', successColor)
   store.user = null
+  store.tasks = null
   $('#auth-area').html('')
-  $('#game-board').html('')
-  $('#game-area').html('')
+  tasks.hideTasks()
 }
 
 const signOutFailure = function () {

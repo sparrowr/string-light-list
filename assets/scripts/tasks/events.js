@@ -4,6 +4,13 @@ const getFormFields = require('../../../lib/get-form-fields')
 const api = require('./api')
 const ui = require('./ui')
 const store = require('../store')
+const successColor = '#d0e0e3'
+
+const newTaskSuccess = function () {
+  $('#message').text('Successfully created task')
+  $('#message').css('background-color', successColor)
+  showTasks()
+}
 
 const onAddNewTask = function onAddNewTask (event) {
   event.preventDefault()
@@ -14,9 +21,10 @@ const onAddNewTask = function onAddNewTask (event) {
     data.task.user_id = store.user.id
     console.log(data)
     api.addTask(data)
-      .then(ui.addTaskSuccess)
+      .then(newTaskSuccess)
       .catch(ui.addTaskFailure)
   } else {
+    data.task.id = store.tasks.length
     store.tasks.push(data.task)
     showTasks()
   }
@@ -40,37 +48,62 @@ const displayAddNewTask = function displayAddNewTask (task) {
   document.getElementById('task-area').appendChild(newTaskForm)
 }
 
+const onClickDone = function onClickDone () {
+  event.preventDefault()
+  console.log('done was clicked' + this.id)
+}
+
+const onClickEdit = function onClickEdit () {
+  event.preventDefault()
+  console.log('edit was clicked' + this.id)
+}
 const displayOneTask = function displayOneTask (task) {
-  // create task UI element
+  // create task UI element as an inline form with read-only text
   // attach buttons with event listeners to complete and edit
   // append this element as a child of the task-area div
   console.log(task)
-  const taskElement = document.createElement('form')
-  const editTaskButton = document.createElement('input')
-  const taskInfo = document.createElement('p')
-  taskInfo.setAttribute('value', task.text)
-  taskElement.appendChild(taskInfo)
-  editTaskButton.setAttribute('type', 'submit')
-  taskElement.appendChild(editTaskButton)
-  document.getElementById('task-area').appendChild(taskElement)
+  const taskIdHTML = '<form class="form-inline" form id="task-'
+  const taskTextHTML = '"> <div class="form-group mb-2"> <input type="text" readonly class="form-control-plaintext task" value='
+  const doneButtonHTML = '> </div> <button type="submit" class="btn btn-primary mb-2 done" id="#done-'
+  const editButtonHTML = '">Done</button><button type="submit" class="btn btn-primary mb-2 edit" id="#edit-'
+  const postTaskHTML = '">Edit</button> </form>'
+  const formId = '#task-' + task.id
+  const allTheHTML = taskIdHTML + task.id + taskTextHTML + task.text + doneButtonHTML + task.id + editButtonHTML + task.id + postTaskHTML
+  $('#task-area').append(allTheHTML)
+  $(formId).on('click', '.done', onClickDone)
+  $(formId).on('click', '.edit', onClickEdit)
 }
 
-const displayAllTasks = function displayAllTasks () {
+const getAllTasksSuccess = function (data) {
+  $('#message').text('Successfully got tasks from api')
+  $('#message').css('background-color', successColor)
+  store.tasks = data.tasks
+  displayAllTasks()
+}
+
+const getTasks = function getTasks () {
   // if user, fetch user's tasks
   if (store.user) {
     // api call here
     api.getAllTasks()
-      .then(ui.getAllTasksSuccess)
+      .then(getAllTasksSuccess)
       .catch(ui.getAllTasksFailure)
-  }
-  // if no tasks, do nothing
-  // if there's no user and no tasks, do nothing
-  if (!store.tasks) {
     return
   }
+  if (!store.tasks) {
+    console.log('no tasks')
+    store.tasks = []
+  } else {
+    displayAllTasks()
+  }
+}
+
+const displayAllTasks = function displayAllTasks () {
   // iterate over tasks, displaying only the ones belonging to this user
   for (let i = 0; i < store.tasks.length; i++) {
-    if (store.tasks[i].user.id === store.user.id && store.tasks[i].condition !== 'closed') {
+    if (!store.user) {
+      displayOneTask(store.tasks[i])
+    } else if (store.tasks[i].user.id === store.user.id && store.tasks[i].condition !== 'done') {
       displayOneTask(store.tasks[i])
     }
   }
@@ -78,6 +111,11 @@ const displayAllTasks = function displayAllTasks () {
 
 const hideTasks = function hideTasks () {
   $('#task-area').html('')
+}
+
+const onHideTasks = function onHideTasks () {
+  event.preventDefault()
+  hideTasks()
 }
 
 const displayHideTasksButton = function displayHideTasksButton () {
@@ -88,7 +126,7 @@ const displayHideTasksButton = function displayHideTasksButton () {
   hideTasksButton.setAttribute('class', 'btn')
   hideTasksButton.setAttribute('value', 'Hide Tasks')
   hideTasksForm.appendChild(hideTasksButton)
-  hideTasksForm.addEventListener('submit', hideTasks)
+  hideTasksForm.addEventListener('submit', onHideTasks)
   document.getElementById('task-area').appendChild(hideTasksForm)
 }
 
@@ -101,12 +139,12 @@ const showTasks = function showTasks () {
     $('#task-area').html('<p class="welcome">Welcome, ' + store.user.email + '! Your information will be saved.<p>')
   } else {
     // if not signed in, welcome guest
-    $('#task-area').html('<p class="welcome">Welcome, guest! Since you aren\'t logged in, no information will be saved.<p>')
+    $('#task-area').html('<p class="welcome">Welcome, guest! Since you aren\'t logged in, no information will be saved when you leave or refresh this page.<p>')
   }
   // display "hide all tasks" button
   displayHideTasksButton()
-  // display list of tasks, each of which has "finish" and "edit" buttons
-  displayAllTasks()
+  // get and display tasks
+  getTasks()
   // display "add new task" form with text box
   displayAddNewTask()
 }
@@ -121,5 +159,7 @@ const addHandlers = () => {
 }
 
 module.exports = {
-  addHandlers
+  addHandlers,
+  showTasks,
+  hideTasks
 }
