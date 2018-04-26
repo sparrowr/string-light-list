@@ -26,7 +26,20 @@ const getAllTasks = function () {
   })
 }
 
+const updateTask = function (id, data) {
+  return $.ajax({
+    url: config.apiUrl + '/tasks/' + id,
+    method: 'PATCH',
+    headers: {
+      contentType: 'application/json',
+      Authorization: 'Token token=' + store.user.token
+    },
+    data
+  })
+}
+
 module.exports = {
   addTask,
-  getAllTasks
+  getAllTasks,
+  updateTask
 }

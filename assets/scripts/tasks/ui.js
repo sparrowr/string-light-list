@@ -12,7 +12,13 @@ const getAllTasksFailure = function () {
   $('#message').css('background-color', failureColor)
 }
 
+const updateTaskFailure = function () {
+  $('#message').text('Failure updating task')
+  $('#message').css('background-color', failureColor)
+}
+
 module.exports = {
   newTaskFailure,
-  getAllTasksFailure
+  getAllTasksFailure,
+  updateTaskFailure
 }

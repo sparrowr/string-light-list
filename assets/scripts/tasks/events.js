@@ -31,6 +31,8 @@ const onAddNewTask = function onAddNewTask (event) {
 }
 
 const displayAddNewTask = function displayAddNewTask (task) {
+  // empty task change area
+  // $('#task-change').html('')
   // generate "Add New Task" form with event listener
   const newTaskForm = document.createElement('form')
   const newTaskButton = document.createElement('input')
@@ -45,36 +47,57 @@ const displayAddNewTask = function displayAddNewTask (task) {
   newTaskForm.appendChild(newTaskButton)
   newTaskForm.addEventListener('submit', onAddNewTask)
   // append this form as a child of the task-area div
-  document.getElementById('task-area').appendChild(newTaskForm)
+  document.getElementById('task-changes').appendChild(newTaskForm)
+}
+
+const updateTaskSuccess = function updateTaskSuccess () {
+  $('#message').text('Successfully updated task')
+  $('#message').css('background-color', successColor)
+  hideTasks()
 }
 
 const onClickDone = function onClickDone () {
   event.preventDefault()
-  console.log('done was clicked' + this.id)
+  store.tasks[this.id].condition = 'done'
+  if (!store.user) {
+    updateTaskSuccess()
+  } else {
+    const data = {task: {
+      text: store.tasks[this.id].text,
+      condition: store.tasks[this.id].condition,
+      user_id: store.tasks[this.id].user.id
+    }}
+    console.log(store.tasks[this.id].id, data)
+    api.updateTask(store.tasks[this.id].id, data)
+      .then(updateTaskSuccess)
+      .catch(ui.updateTaskFailure)
+  }
 }
 
 const onClickEdit = function onClickEdit () {
   event.preventDefault()
   console.log('edit was clicked' + this.id)
 }
-const displayOneTask = function displayOneTask (task) {
+const displayOneTask = function displayOneTask (task, id) {
   // create task UI element as an inline form with read-only text
   // attach buttons with event listeners to complete and edit
   // append this element as a child of the task-area div
+  // both buttons ids === the id of the task they're attached to
   console.log(task)
   const taskIdHTML = '<form class="form-inline" form id="task-'
   const taskTextHTML = '"> <div class="form-group mb-2"> <input type="text" readonly class="form-control-plaintext task" value='
-  const doneButtonHTML = '> </div> <button type="submit" class="btn btn-primary mb-2 done" id="#done-'
-  const editButtonHTML = '">Done</button><button type="submit" class="btn btn-primary mb-2 edit" id="#edit-'
+  const doneButtonHTML = '> </div> <button type="submit" class="btn btn-primary mb-2 done" id="'
+  const editButtonHTML = '">Done</button><button type="submit" class="btn btn-primary mb-2 edit" id="'
   const postTaskHTML = '">Edit</button> </form>'
-  const formId = '#task-' + task.id
-  const allTheHTML = taskIdHTML + task.id + taskTextHTML + task.text + doneButtonHTML + task.id + editButtonHTML + task.id + postTaskHTML
+  const formId = '#task-' + id
+  const allTheHTML = taskIdHTML + id + taskTextHTML + task.text + doneButtonHTML + id + editButtonHTML + id + postTaskHTML
   $('#task-area').append(allTheHTML)
   $(formId).on('click', '.done', onClickDone)
   $(formId).on('click', '.edit', onClickEdit)
 }
 
 const getAllTasksSuccess = function (data) {
+  console.log(data.tasks)
   $('#message').text('Successfully got tasks from api')
   $('#message').css('background-color', successColor)
   store.tasks = data.tasks
@@ -100,17 +123,21 @@ const getTasks = function getTasks () {
 
 const displayAllTasks = function displayAllTasks () {
   // iterate over tasks, displaying only the ones belonging to this user
+  console.log('all tasks:', store.tasks)
   for (let i = 0; i < store.tasks.length; i++) {
     if (!store.user) {
-      displayOneTask(store.tasks[i])
+      if (store.tasks[i].condition !== 'done') {
+        displayOneTask(store.tasks[i])
+      }
     } else if (store.tasks[i].user.id === store.user.id && store.tasks[i].condition !== 'done') {
-      displayOneTask(store.tasks[i])
+      displayOneTask(store.tasks[i], i)
     }
   }
 }
 
 const hideTasks = function hideTasks () {
   $('#task-area').html('')
+  $('#task-changes').html('')
 }
 
 const onHideTasks = function onHideTasks () {
