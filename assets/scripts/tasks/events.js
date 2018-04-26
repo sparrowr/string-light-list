@@ -67,8 +67,27 @@ const onClickDone = function onClickDone () {
       condition: store.tasks[this.id].condition,
       user_id: store.tasks[this.id].user.id
     }}
-    console.log(store.tasks[this.id].id, data)
     api.updateTask(store.tasks[this.id].id, data)
+      .then(updateTaskSuccess)
+      .catch(ui.updateTaskFailure)
+  }
+}
+
+const onUpdateTask = function onUpdateTask () {
+  event.preventDefault()
+  let data = getFormFields(event.target)
+  console.log(store.tasks[store.updatingTask])
+  console.log(data)
+  store.tasks[store.updatingTask].text = data.task.text
+  if (!store.user) {
+    updateTaskSuccess()
+  } else {
+    data = {task: {
+      text: store.tasks[store.updatingTask].text,
+      condition: store.tasks[store.updatingTask].condition,
+      user_id: store.tasks[store.updatingTask].user.id
+    }}
+    api.updateTask(store.tasks[store.updatingTask].id, data)
       .then(updateTaskSuccess)
       .catch(ui.updateTaskFailure)
   }
@@ -76,14 +95,33 @@ const onClickDone = function onClickDone () {
 
 const onClickEdit = function onClickEdit () {
   event.preventDefault()
-  console.log('edit was clicked' + this.id)
+  // console.log('edit was clicked' + this.id)
+  // draw edit ui
+  $('#task-changes').html('')
+  const editTaskForm = document.createElement('form')
+  const editTaskButton = document.createElement('input')
+  const taskField = document.createElement('input')
+  taskField.setAttribute('type', 'text')
+  taskField.setAttribute('name', 'task[text]')
+  taskField.setAttribute('value', store.tasks[this.id].text)
+  editTaskForm.appendChild(taskField)
+  editTaskButton.setAttribute('type', 'submit')
+  editTaskButton.setAttribute('class', 'btn')
+  editTaskButton.setAttribute('value', 'Update')
+  editTaskForm.appendChild(editTaskButton)
+  // set up listener for submitting edit
+  editTaskForm.addEventListener('submit', onUpdateTask)
+  // append this form as a child of the task-area div
+  document.getElementById('task-changes').appendChild(editTaskForm)
+  store.updatingTask = store.tasks[this.id].id
 }
+
 const displayOneTask = function displayOneTask (task, id) {
   // create task UI element as an inline form with read-only text
   // attach buttons with event listeners to complete and edit
   // append this element as a child of the task-area div
   // both buttons ids === the id of the task they're attached to
-  console.log(task)
+  // console.log(task)
   const taskIdHTML = '<form class="form-inline" form id="task-'
   const taskTextHTML = '"> <div class="form-group mb-2"> <input type="text" readonly class="form-control-plaintext task" value='
   const doneButtonHTML = '> </div> <button type="submit" class="btn btn-primary mb-2 done" id="'
@@ -97,7 +135,7 @@ const displayOneTask = function displayOneTask (task, id) {
 }
 
 const getAllTasksSuccess = function (data) {
-  console.log(data.tasks)
+  // console.log(data.tasks)
   $('#message').text('Successfully got tasks from api')
   $('#message').css('background-color', successColor)
   store.tasks = data.tasks
@@ -114,7 +152,7 @@ const getTasks = function getTasks () {
     return
   }
   if (!store.tasks) {
-    console.log('no tasks')
+    // console.log('no tasks')
     store.tasks = []
   } else {
     displayAllTasks()
@@ -123,7 +161,7 @@ const getTasks = function getTasks () {
 
 const displayAllTasks = function displayAllTasks () {
   // iterate over tasks, displaying only the ones belonging to this user
-  console.log('all tasks:', store.tasks)
+  // console.log('all tasks:', store.tasks)
   for (let i = 0; i < store.tasks.length; i++) {
     if (!store.user) {
       if (store.tasks[i].condition !== 'done') {
@@ -159,7 +197,7 @@ const displayHideTasksButton = function displayHideTasksButton () {
 
 const showTasks = function showTasks () {
   // show task stuff!
-  console.log('showTasks in events.js was called!')
+  // console.log('showTasks in events.js was called!')
   hideTasks()
   if (store.user) {
     // if signed in, welcome user
